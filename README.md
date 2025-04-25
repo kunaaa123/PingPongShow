@@ -19,11 +19,14 @@
 ```bash
 git clone https://github.com/kunaaa123/PingPongShow
 cd pingshow
+----
+```
 
-
+``bash
 2️⃣ ติดตั้ง Dependencies
 go mod tidy
-
+----
+```
 
 3️⃣ ตั้งค่าฐานข้อมูล
 - โหลดไฟล์ Database
