@@ -13,7 +13,8 @@
 ---
 
 ## 🚀 การติดตั้ง
-
+git clone https://github.com/kunaaa123/PingPongShow
+cd pingshow
 ### 1️⃣ โคลนโปรเจค
 
 ```bash
