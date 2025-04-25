@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package pingpong;
+
+option go_package = ".;pingpong";
+
+// บริการสำหรับจัดการโต๊ะเกม
+service TableService {
+    rpc StartMatch (StartRequest) returns (stream MatchEvent) {}
+    rpc GetLatestMatch (Empty) returns (LatestMatch) {}
+}
+
+// บริการสำหรับจัดการผู้เล่น
+service PlayerService {
+    rpc GetPlayerInfo (PlayerRequest) returns (PlayerInfo) {}
+    rpc UpdatePlayerStats (PlayerStats) returns (Empty) {}
+}
+
+message StartRequest {
+    bool new_game = 1;
+}
+
+message MatchEvent {
+    string time = 1;
+    string player = 2;
+    int32 power = 3;
+    string goroutine = 4;
+    int32 match_number = 5;
+    int64 duration = 6;
+    string event_type = 7; // "hit" or "game_over"
+}
+
+message LatestMatch {
+    int32 match_number = 1;
+}
+
+message PlayerRequest {
+    string player_id = 1;
+}
+
+message PlayerInfo {
+    string player_id = 1;
+    string name = 2;
+    int32 total_games = 3;
+    int32 wins = 4;
+}
+
+message PlayerStats {
+    string player_id = 1;
+    bool win = 2;
+    int32 power_used = 3;
+}
+
+message Empty {}
