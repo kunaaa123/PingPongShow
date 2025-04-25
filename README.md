@@ -29,21 +29,28 @@ go mod tidy
 ```
 
 3️⃣ ตั้งค่าฐานข้อมูล
+```bash
 - โหลดไฟล์ Database
 - Import เข้า MySQL
+```
 
 
 ### วิธีที่ 1: รันแบบ All-in-One  
 ```bash
 go run cmd/all_in_one/main.go
 
-วิธีที่ 2: รันแต่ละ Service แยกกัน
+```
+### วิธีที่ 2: รันแต่ละ Service แยกกัน
 - รัน Player Service:go run cmd/player_service/main.go
+
+```bash
 
 - รัน Table Service:go run cmd/table_service/main.go
 
+```
+```bash
 - รัน Client:go run cmd/client/main.go
-
+```
 
 
 📖 กฎการเล่น
