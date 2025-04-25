@@ -30,10 +30,9 @@ go mod tidy
 - Import เข้า MySQL
 
 
-🎮 การรันเกม
-วิธีที่ 1: รันแบบ All-in-One
+### วิธีที่ 1: รันแบบ All-in-One  
+```bash
 go run cmd/all_in_one/main.go
-
 
 วิธีที่ 2: รันแต่ละ Service แยกกัน
 - รัน Player Service:go run cmd/player_service/main.go
