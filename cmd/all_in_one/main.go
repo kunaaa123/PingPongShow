@@ -45,9 +45,9 @@ func main() {
 		}
 	}()
 
-	// Table Service
+
 	go func() {
-		// ใช้ MySQL Repository แทน
+	
 		matchService := service.NewMatchService(mysqlRepo)
 		matchHandler := handler.NewMatchHandler(matchService)
 
@@ -64,20 +64,20 @@ func main() {
 		}
 	}()
 
-	// รอให้ service ทั้งสองตัว start ก่อน (กัน client เชื่อมต่อไม่ทัน)
+	
 	time.Sleep(2 * time.Second)
 
-	// Run client (เกม)
+
 	go func() {
-		// ใช้ exec รัน client/main.go (หรือจะย้ายโค้ด client มาไว้ในไฟล์นี้เลยก็ได้)
+	
 		cmd := exec.Command("go", "run", "./cmd/client/main.go")
 		cmd.Stdout = log.Writer()
 		cmd.Stderr = log.Writer()
 		if err := cmd.Run(); err != nil {
 			log.Fatalf("Client error: %v", err)
 		}
-		wg.Done() // แจ้งว่า client จบแล้ว
+		wg.Done() 
 	}()
 
-	wg.Wait() // รอจนกว่า client จะจบ
+	wg.Wait() 
 }
