@@ -195,7 +195,7 @@ jobs:
                       "type": "primary"
                     }
                   ]
-                },
+                }
               ]
             }
           }'
