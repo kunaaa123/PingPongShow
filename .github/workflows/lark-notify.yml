@@ -10,16 +10,16 @@ env:
   LARK_WEBHOOK: "https://open.larksuite.com/open-apis/bot/v2/hook/88fccfea-8fad-47d9-99a9-44d214785fff"
   APP_ID: "cli_a8b2c70af7389029"
   APP_SECRET: "QUbHQALAU0xrxWid9QU8Hb50wpY1wtwv"
-  IMAGE_KEY: "v3_00mu_602e76b7-0c87-4123-b306-03a13464afhu"
+  LARK_IMAGE_KEY: "img_v3_00mu_602e76b7-0c87-4123-b306-03a13464afhu"
 
 jobs:
   deploy-and-notify:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Get commit info
       id: commit_info
       run: |
@@ -31,6 +31,17 @@ jobs:
         git log -3 --pretty=format:'• %s' >> $GITHUB_OUTPUT
         echo "" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Get Lark tenant access token
+      id: get_token
+      run: |
+        TOKEN=$(curl -s -X POST "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "app_id": "'$APP_ID'",
+            "app_secret": "'$APP_SECRET'"
+          }' | jq -r '.tenant_access_token')
+        echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
     - name: Send notification to Lark
       run: |
@@ -52,14 +63,11 @@ jobs:
               "elements": [
                 {
                   "tag": "img",
-                  "img_key": "'"$IMAGE_KEY"'",
+                  "img_key": "'"${{ env.LARK_IMAGE_KEY }}"'",
                   "alt": {
                     "tag": "plain_text",
                     "content": "GitHub Logo"
-                  },
-                  "mode": "fit_horizontal",
-                  "preview": true,
-                  "compact_width": false
+                  }
                 },
                 {
                   "tag": "column_set",
