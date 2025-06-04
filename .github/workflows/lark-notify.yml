@@ -10,7 +10,6 @@ env:
   LARK_WEBHOOK: "https://open.larksuite.com/open-apis/bot/v2/hook/88fccfea-8fad-47d9-99a9-44d214785fff"
   APP_ID: "cli_a8b2c70af7389029"
   APP_SECRET: "QUbHQALAU0xrxWid9QU8Hb50wpY1wtwv"
-  LARK_IMAGE_KEY: "img_v3_00mu_602e76b7-0c87-4123-b306-03a13464afhu"
 
 jobs:
   deploy-and-notify:
@@ -63,7 +62,7 @@ jobs:
               "elements": [
                 {
                   "tag": "img",
-                  "img_key": "'"${{ env.LARK_IMAGE_KEY }}"'",
+                  "img_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
                   "alt": {
                     "tag": "plain_text",
                     "content": "GitHub Logo"
