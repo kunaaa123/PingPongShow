@@ -1,1 +1,201 @@
+name: Deploy and Notify Lark
 
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+env:
+  LARK_WEBHOOK: "https://open.larksuite.com/open-apis/bot/v2/hook/88fccfea-8fad-47d9-99a9-44d214785fff"
+  APP_ID: "cli_a8b2c70af7389029"
+  APP_SECRET: "QUbHQALAU0xrxWid9QU8Hb50wpY1wtwv"
+
+jobs:
+  deploy-and-notify:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Get commit info
+      id: commit_info
+      run: |
+        echo "commit_message=$(git log -1 --pretty=format:'%s')" >> $GITHUB_OUTPUT
+        echo "author_name=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
+        echo "repo_name=${{ github.repository }}" >> $GITHUB_OUTPUT
+        echo "repo_url=${{ github.event.repository.html_url }}" >> $GITHUB_OUTPUT
+        echo "commit_list<<EOF" >> $GITHUB_OUTPUT
+        git log -3 --pretty=format:'• %s' >> $GITHUB_OUTPUT
+        echo "" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+    
+    - name: Get Lark tenant access token
+      id: get_token
+      run: |
+        TOKEN=$(curl -s -X POST "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "app_id": "'$APP_ID'",
+            "app_secret": "'$APP_SECRET'"
+          }' | jq -r '.tenant_access_token')
+        echo "token=$TOKEN" >> $GITHUB_OUTPUT
+    
+    - name: Download GitHub logo
+      run: |
+          curl -o github_logo.png https://it.gwu.edu/sites/g/files/zaxdzs5486/files/2023-10/github_logo.png
+    
+    - name: Upload image to Lark
+      id: upload_image
+      run: |
+        IMAGE_KEY=$(curl -s -X POST "https://open.larksuite.com/open-apis/im/v1/images" \
+          -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
+          -F "image_type=message" \
+          -F "image=@github_logo.png" | jq -r '.data.image_key')
+        echo "image_key=$IMAGE_KEY" >> $GITHUB_OUTPUT
+    
+    - name: Send notification to Lark
+      run: |
+        curl -X POST "$LARK_WEBHOOK" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "msg_type": "interactive",
+            "card": {
+              "config": {
+                "wide_screen_mode": true
+              },
+              "header": {
+                "title": {
+                  "tag": "plain_text",
+                  "content": "Backend Deployment"
+                },
+                "template": "blue"
+              },
+              "elements": [
+                {
+                  "tag": "img",
+                  "img_key": "${{ steps.upload_image.outputs.image_key }}",
+                  "alt": {
+                    "tag": "plain_text",
+                    "content": "GitHub Logo"
+                  },
+                  "mode": "fit_horizontal",
+                  "preview": true,
+                  "compact_width": false
+                },
+                {
+                  "tag": "column_set",
+                  "flex_mode": "none",
+                  "background_style": "default",
+                  "columns": [
+                    {
+                      "tag": "column",
+                      "width": "weighted",
+                      "weight": 1,
+                      "vertical_align": "top",
+                      "elements": [
+                        {
+                          "tag": "column_set",
+                          "flex_mode": "none",
+                          "background_style": "grey",
+                          "columns": [
+                            {
+                              "tag": "column",
+                              "width": "weighted",
+                              "weight": 1,
+                              "vertical_align": "top",
+                              "elements": [
+                                {
+                                  "tag": "markdown",
+                                  "content": "**Environment\n<font color=\"green\">DEV</font>**",
+                                  "text_align": "center"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "column",
+                      "width": "weighted",
+                      "weight": 1,
+                      "vertical_align": "top",
+                      "elements": [
+                        {
+                          "tag": "column_set",
+                          "flex_mode": "none",
+                          "background_style": "grey",
+                          "columns": [
+                            {
+                              "tag": "column",
+                              "width": "weighted",
+                              "weight": 1,
+                              "vertical_align": "top",
+                              "elements": [
+                                {
+                                  "tag": "markdown",
+                                  "content": "**Deployer\n<font color=\"blue\">${{ steps.commit_info.outputs.author_name }}</font>**",
+                                  "text_align": "center"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "tag": "column",
+                      "width": "weighted",
+                      "weight": 1,
+                      "vertical_align": "top",
+                      "elements": [
+                        {
+                          "tag": "column_set",
+                          "flex_mode": "none",
+                          "background_style": "grey",
+                          "columns": [
+                            {
+                              "tag": "column",
+                              "width": "weighted",
+                              "weight": 1,
+                              "vertical_align": "top",
+                              "elements": [
+                                {
+                                  "tag": "markdown",
+                                  "content": "**Service Name\n<font color=\"red\">${{ github.event.repository.name }}</font>**",
+                                  "text_align": "center"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "tag": "div",
+                  "text": {
+                    "tag": "lark_md",
+                    "content": "**Recent Commit Messages**\n${{ steps.commit_info.outputs.commit_list }}"
+                  }
+                },
+                {
+                  "tag": "action",
+                  "actions": [
+                    {
+                      "tag": "button",
+                      "text": {
+                        "content": "View Repository",
+                        "tag": "plain_text"
+                      },
+                      "url": "${{ github.event.repository.html_url }}",
+                      "type": "primary"
+                    }
+                  ]
+                },
+              ]
+            }
+          }'
