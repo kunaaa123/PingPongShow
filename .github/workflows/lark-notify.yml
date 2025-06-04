@@ -10,7 +10,7 @@ env:
   LARK_WEBHOOK: "https://open.larksuite.com/open-apis/bot/v2/hook/88fccfea-8fad-47d9-99a9-44d214785fff"
   APP_ID: "cli_a8b2c70af7389029"
   APP_SECRET: "QUbHQALAU0xrxWid9QU8Hb50wpY1wtwv"
-  LARK_IMAGE_KEY: "v3_00mu_602e76b7-0c87-4123-b306-03a13464afhu"
+  IMAGE_KEY: "v3_00mu_602e76b7-0c87-4123-b306-03a13464afhu"
 
 jobs:
   deploy-and-notify:
@@ -31,18 +31,7 @@ jobs:
         git log -3 --pretty=format:'• %s' >> $GITHUB_OUTPUT
         echo "" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
-    
-    - name: Get Lark tenant access token
-      id: get_token
-      run: |
-        TOKEN=$(curl -s -X POST "https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal" \
-          -H "Content-Type: application/json" \
-          -d '{
-            "app_id": "'$APP_ID'",
-            "app_secret": "'$APP_SECRET'"
-          }' | jq -r '.tenant_access_token')
-        echo "token=$TOKEN" >> $GITHUB_OUTPUT
-    
+
     - name: Send notification to Lark
       run: |
         curl -X POST "$LARK_WEBHOOK" \
@@ -63,7 +52,7 @@ jobs:
               "elements": [
                 {
                   "tag": "img",
-                  "img_key": "'"${LARK_IMAGE_KEY}"'",
+                  "img_key": "'"$IMAGE_KEY"'",
                   "alt": {
                     "tag": "plain_text",
                     "content": "GitHub Logo"
@@ -84,24 +73,9 @@ jobs:
                       "vertical_align": "top",
                       "elements": [
                         {
-                          "tag": "column_set",
-                          "flex_mode": "none",
-                          "background_style": "grey",
-                          "columns": [
-                            {
-                              "tag": "column",
-                              "width": "weighted",
-                              "weight": 1,
-                              "vertical_align": "top",
-                              "elements": [
-                                {
-                                  "tag": "markdown",
-                                  "content": "**Environment\n<font color=\"green\">DEV</font>**",
-                                  "text_align": "center"
-                                }
-                              ]
-                            }
-                          ]
+                          "tag": "markdown",
+                          "content": "**Environment\n<font color=\"green\">DEV</font>**",
+                          "text_align": "center"
                         }
                       ]
                     },
@@ -112,24 +86,9 @@ jobs:
                       "vertical_align": "top",
                       "elements": [
                         {
-                          "tag": "column_set",
-                          "flex_mode": "none",
-                          "background_style": "grey",
-                          "columns": [
-                            {
-                              "tag": "column",
-                              "width": "weighted",
-                              "weight": 1,
-                              "vertical_align": "top",
-                              "elements": [
-                                {
-                                  "tag": "markdown",
-                                  "content": "**Deployer\n<font color=\"blue\">${{ steps.commit_info.outputs.author_name }}</font>**",
-                                  "text_align": "center"
-                                }
-                              ]
-                            }
-                          ]
+                          "tag": "markdown",
+                          "content": "**Deployer\n<font color=\"blue\">${{ steps.commit_info.outputs.author_name }}</font>**",
+                          "text_align": "center"
                         }
                       ]
                     },
@@ -140,24 +99,9 @@ jobs:
                       "vertical_align": "top",
                       "elements": [
                         {
-                          "tag": "column_set",
-                          "flex_mode": "none",
-                          "background_style": "grey",
-                          "columns": [
-                            {
-                              "tag": "column",
-                              "width": "weighted",
-                              "weight": 1,
-                              "vertical_align": "top",
-                              "elements": [
-                                {
-                                  "tag": "markdown",
-                                  "content": "**Service Name\n<font color=\"red\">${{ github.event.repository.name }}</font>**",
-                                  "text_align": "center"
-                                }
-                              ]
-                            }
-                          ]
+                          "tag": "markdown",
+                          "content": "**Service Name\n<font color=\"red\">${{ github.event.repository.name }}</font>**",
+                          "text_align": "center"
                         }
                       ]
                     }
