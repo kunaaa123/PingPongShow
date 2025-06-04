@@ -10,6 +10,7 @@ env:
   LARK_WEBHOOK: "https://open.larksuite.com/open-apis/bot/v2/hook/88fccfea-8fad-47d9-99a9-44d214785fff"
   APP_ID: "cli_a8b2c70af7389029"
   APP_SECRET: "QUbHQALAU0xrxWid9QU8Hb50wpY1wtwv"
+  LARK_IMAGE_KEY: "v3_00mu_602e76b7-0c87-4123-b306-03a13464afhu"
 
 jobs:
   deploy-and-notify:
@@ -42,19 +43,6 @@ jobs:
           }' | jq -r '.tenant_access_token')
         echo "token=$TOKEN" >> $GITHUB_OUTPUT
     
-    - name: Download GitHub logo
-      run: |
-          curl -o github_logo.png https://it.gwu.edu/sites/g/files/zaxdzs5486/files/2023-10/github_logo.png
-    
-    - name: Upload image to Lark
-      id: upload_image
-      run: |
-        IMAGE_KEY=$(curl -s -X POST "https://open.larksuite.com/open-apis/im/v1/images" \
-          -H "Authorization: Bearer ${{ steps.get_token.outputs.token }}" \
-          -F "image_type=message" \
-          -F "image=@github_logo.png" | jq -r '.data.image_key')
-        echo "image_key=$IMAGE_KEY" >> $GITHUB_OUTPUT
-    
     - name: Send notification to Lark
       run: |
         curl -X POST "$LARK_WEBHOOK" \
@@ -75,7 +63,7 @@ jobs:
               "elements": [
                 {
                   "tag": "img",
-                  "img_key": "${{ steps.upload_image.outputs.image_key }}",
+                  "img_key": "'"${LARK_IMAGE_KEY}"'",
                   "alt": {
                     "tag": "plain_text",
                     "content": "GitHub Logo"
